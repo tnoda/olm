@@ -5,6 +5,10 @@ module Olm
 
   extend self
 
+  def app
+    Olm::App.instance
+  end
+
   def ls(folder_id = nil)
     puts Olm::App.instance.ls(folder_id)
   end
@@ -31,5 +35,10 @@ module Olm
 
   def send_message
     Olm::App.instance.create_message(ARGF).Send
+  end
+
+  def create_reply_all_message(entry_id)
+    reply_mail_entry_id = app.create_reply_all_message(entry_id)
+    puts message(reply_mail_entry_id)
   end
 end
