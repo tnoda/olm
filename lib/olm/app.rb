@@ -71,10 +71,10 @@ module Olm
     def create_message(io)
       x = {:body => ''}
       header = true
-      io.each_line do |line|
+      io.set_encoding(Encoding::UTF_8).each_line do |line|
         line.chomp!
         if header
-          if line.empty? || /^---- / =~ line
+          if /^---- / =~ line
             header = false
           else
             next unless /^(.*?): (.*)/ =~ line
@@ -84,7 +84,6 @@ module Olm
         else
           x[:body] << line
           x[:body] << "\n"
-          p x[:body]
         end
       end
       m = @app.CreateItem(OlMailItem)
@@ -93,7 +92,7 @@ module Olm
       m.CC = x['Cc'] if x['Cc']
       m.BCC = x['Bcc'] if x['Bcc']
       m.Subject = NKF.nkf('-s', x['Subject']) if x['Subject']
-      m.Body = NKF.nkf('-s', x[:body]) if x[:body]
+      m.Body = NKF.nkf('-s -Lw', x[:body]) if x[:body]
       m
     end
 
