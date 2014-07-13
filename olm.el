@@ -52,7 +52,7 @@
     (setq-local buffer-read-only nil)
     (erase-buffer)
     (let ((command (if olm-folder-id
-                       (concat "Olm.ls '" olm-folder-id "'")
+                       (format "Olm.ls %S" olm-folder-id)
                      "Olm.ls")))
       (olm-do-command command t))))
 
@@ -212,7 +212,7 @@
                      (olm-mail-item-entry-id-at))))
     (with-current-buffer mbuf
       (setq-local buffer-file-coding-system 'utf-8-dos))
-    (olm-do-command (concat "Olm.message '" entry-id "'") mbuf)
+    (olm-do-command (format "Olm.message %S" entry-id) mbuf)
     (with-current-buffer mbuf
       (olm-message-mode)
       (goto-char (point-min)))
@@ -222,9 +222,7 @@
 (defun olm-summary-mark-message-as-read
   ()
   (interactive)
-  (olm-do-command (concat "Olm.mark_as_read '"
-                          (olm-mail-item-entry-id-at)
-                          "'")))
+  (olm-do-command (format "Olm.mark_as_read %S" (olm-mail-item-entry-id-at))))
 
 (defun olm-summary-scroll-message-forward
   ()
@@ -256,9 +254,7 @@
   ()
   (interactive)
   (let ((n (line-number-at-pos)))
-    (olm-do-command (concat "Olm.toggle_task_flag '"
-                          (olm-mail-item-entry-id-at)
-                          "'"))
+    (olm-do-command (format "Olm.toggle_task_flag" (olm-mail-item-entry-id-at)))
     (olm-scan)
     (goto-line n)))
 
