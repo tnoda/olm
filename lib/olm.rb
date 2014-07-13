@@ -10,31 +10,31 @@ module Olm
   end
 
   def ls(folder_id = nil)
-    puts Olm::App.instance.ls(folder_id)
+    puts app.ls(folder_id)
   end
 
   def send_and_receive
-    Olm::App.instance.send_and_receive
+    app.send_and_receive
   end
 
   def message(entry_id)
-    puts Olm::App.instance.message(entry_id)
+    puts app.message(entry_id)
   end
 
   def toggle_task_flag(entry_id)
-    Olm::App.instance.toggle_task_flag(entry_id)
+    app.toggle_task_flag(entry_id)
   end
 
   def mark_as_read(entry_id)
-    Olm::App.instance.mark_as_read(entry_id)
+    app.mark_as_read(entry_id)
   end
 
   def save_message
-    Olm::App.instance.create_message(ARGF).Save
+    app.create_message(ARGF).Save
   end
 
   def send_message
-    Olm::App.instance.create_message(ARGF).Send
+    app.create_message(ARGF).Send
   end
 
   def create_reply_all_message(entry_id)
