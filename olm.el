@@ -214,6 +214,17 @@
       (setq-local buffer-file-coding-system 'utf-8-dos))
     (olm-do-command (format "Olm.message %S" entry-id) mbuf)
     (with-current-buffer mbuf
+      (let ((inhibit-read-only t))
+        (put-text-property (progn
+                             (goto-char (point-min))
+                             (point))
+                           (line-end-position)
+                           'read-only
+                           nil))
+      (narrow-to-region (progn
+                          (goto-line 2)
+                          (point))
+                        (point-max))
       (olm-message-mode)
       (goto-char (point-min)))
     (set-window-buffer msg-window mbuf)
