@@ -82,6 +82,16 @@
             (sit-for 1))))
     (message "done.")))
 
+(defun olm-hide-entry-id-line
+  ()
+  (interactive)
+  (let ((pos (point)))
+    (narrow-to-region (progn
+                        (goto-line 2)
+                        (point))
+                      (point-max))
+    (goto-char pos)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; buffers
@@ -112,12 +122,21 @@
     (with-current-buffer buf
       (setq-local buffer-read-only nil)
       (erase-buffer)
+      (insert "\n")
       (insert "To: \n")
       (insert "Cc: \n")
       (when olm-default-bcc
         (insert "Bcc: " olm-default-bcc "\n"))
       (insert "Subject: \n")
       (insert "---- \n"))
+    buf))
+
+(defun olm-buf-draft-reply-all
+  ()
+  (let ((buf (get-buffer-create "*olm-draft-reply-all*")))
+    (with-current-buffer buf
+      (setq-local buffer-read-only nil)
+      (erase-buffer))
     buf))
 
 
@@ -175,7 +194,8 @@
   (define-key olm-summary-mode-map "p" 'olm-summary-display-up)
   (define-key olm-summary-mode-map "n" 'olm-summary-display-down)
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
-  (define-key olm-summary-mode-map "w" 'olm-summary-write))
+  (define-key olm-summary-mode-map "w" 'olm-summary-write)
+  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all))
 
 (defun olm-summary-inc
   ()
@@ -221,10 +241,7 @@
                            (line-end-position)
                            'read-only
                            nil))
-      (narrow-to-region (progn
-                          (goto-line 2)
-                          (point))
-                        (point-max))
+      (olm-hide-entry-id-line)
       (olm-message-mode)
       (goto-char (point-min)))
     (set-window-buffer msg-window mbuf)
@@ -275,7 +292,34 @@
   (delete-other-windows-vertically)
   (let ((buf (olm-buf-draft)))
     (with-current-buffer buf
+      (olm-hide-entry-id-line)
       (olm-draft-mode))
+    (switch-to-buffer buf)))
+
+(defun olm-summary-reply-all
+  ()
+  (interactive)
+  (let ((entry-id (olm-mail-item-entry-id-at))
+        (buf (olm-buf-draft-reply-all)))
+    (olm-do-command (format "Olm.create_reply_all_message %S" entry-id)
+                    buf)
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (re-search-forward "^From: ")
+      (insert "***Reply All***")
+      (olm-draft-reply-all-mode)
+      (let ((inhibit-read-only t))
+        (put-text-property (progn
+                             (goto-char (point-min))
+                             (point))
+                           (progn
+                             (re-search-forward "^---- ")
+                             (point))
+                           'read-only
+                           t))
+      (olm-hide-entry-id-line)
+      (forward-line))
+    (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
 
@@ -339,3 +383,29 @@
   (message "Olm: sending message ...")
   (olm-draft-do-message "Olm.send_message")
   (olm-draft-kill))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; olm-draft-reply-all
+;;;
+(defvar olm-draft-reply-all-map nil)
+(defvar olm-draft-reply-all-hook nil)
+
+(unless olm-draft-reply-all-map
+  (setq olm-draft-reply-all-map (make-sparse-keymap))
+  (define-key olm-draft-reply-all-map "\C-c\C-q" 'olm-draft-kill)
+  (define-key olm-draft-reply-all-map "\C-c\C-c" 'olm-draft-reply-all-send-message)
+  (define-key olm-draft-reply-all-map "\C-c\C-s" 'olm-draft-reply-all-save-message))
+
+(defun olm-draft-reply-all-mode
+  ()
+  (interactive)
+  (setq major-mode 'olm-draft-reply-all-mode)
+  (setq mode-name "Olm Draft Reply All")
+  (setq-local line-move-ignore-invisible t)
+  (font-lock-mode 1)
+  (use-local-map olm-draft-reply-all-map)
+  (run-hooks 'olm-draft-reply-all-hook))
+
+(add-hook 'olm-draft-reply-all-hook 'olm-message-mode-keyword)
