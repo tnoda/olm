@@ -282,7 +282,8 @@
   ()
   (interactive)
   (let ((n (line-number-at-pos)))
-    (olm-do-command (format "Olm.toggle_task_flag" (olm-mail-item-entry-id-at)))
+    (olm-do-command (format "Olm.toggle_task_flag %S"
+                            (olm-mail-item-entry-id-at)))
     (olm-scan)
     (goto-line n)))
 
