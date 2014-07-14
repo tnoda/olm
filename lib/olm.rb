@@ -41,4 +41,12 @@ module Olm
     reply_mail_entry_id = app.create_reply_all_message(entry_id)
     puts message(reply_mail_entry_id)
   end
+
+  def update_message_body_and_save
+    app.update_message_body(ARGF).Save
+  end
+
+  def update_message_body_and_send
+    app.update_message_body(ARGF).Send
+  end
 end

@@ -79,7 +79,6 @@ module Olm
           else
             next unless /^(.*?): (.*)/ =~ line
             x[$1] = $2
-            p $1, $2
           end
         else
           x[:body] << line
@@ -102,6 +101,30 @@ module Olm
       r.BodyFormat = OlFormatPlain
       r.Save
       r.EntryID
+    end
+
+    def update_message_body(io)
+      entry_id = nil
+      header = true
+      bcc = nil
+      body = ''
+      io.set_encoding(Encoding::UTF_8).each_line do |line|
+        line.chomp!
+        if entry_id.nil?
+          entry_id = line
+        elsif header
+          bcc = $1 if /^Bcc: (.*)/ =~ line
+          header = false if /^---- / =~ line
+        else
+          body << line
+          body << "\n"
+        end
+      end
+      m = @ns.GetItemFromID(entry_id)
+      m.BodyFormat = OlFormatPlain
+      m.Body = NKF.nkf('-s -Lw', body)
+      m.BCC = bcc if bcc
+      m
     end
 
 

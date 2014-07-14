@@ -75,7 +75,7 @@
     (olm-do-command "Olm.send_and_receive" t)
     (message "Olm: synchronizing all objects ...")
     (sit-for 1)
-    (let ((w 3))
+    (let ((w 5))
       (--dotimes w
           (progn
             (message (number-to-string (- w it)))
@@ -308,6 +308,11 @@
       (goto-char (point-min))
       (re-search-forward "^From: ")
       (insert "***Reply All***")
+      (when olm-default-bcc
+        (goto-char (point-min))
+        (re-search-forward "^---- ")
+        (beginning-of-line)
+        (insert "Bcc: " olm-default-bcc "\n"))
       (olm-draft-reply-all-mode)
       (let ((inhibit-read-only t))
         (put-text-property (progn
@@ -365,7 +370,7 @@
   (kill-buffer)
   (olm-scan))
 
-(defun olm-draft-do-message
+(defun olm-draft-do-command
   (command)
   (call-process-region (point-min) (point-max)
                        "ruby" nil (get-buffer-create "*Messages*") nil
@@ -375,14 +380,14 @@
   ()
   (interactive)
   (message "Olm: saving message ...")
-  (olm-draft-do-message "Olm.save_message")
+  (olm-draft-do-command "Olm.save_message")
   (olm-draft-kill))
 
 (defun olm-draft-send-message
   ()
   (interactive)
   (message "Olm: sending message ...")
-  (olm-draft-do-message "Olm.send_message")
+  (olm-draft-do-command "Olm.send_message")
   (olm-draft-kill))
 
 
@@ -408,5 +413,25 @@
   (font-lock-mode 1)
   (use-local-map olm-draft-reply-all-map)
   (run-hooks 'olm-draft-reply-all-hook))
+
+(defun olm-draft-reply-all-do-command
+  (cmd msg)
+  (message msg)
+  (save-restriction
+    (widen)
+    (olm-draft-do-command cmd))
+  (olm-draft-kill))
+
+(defun olm-draft-reply-all-save-message
+  ()
+  (interactive)
+  (olm-draft-reply-all-do-command "Olm.update_message_body_and_save"
+                                  "Olm: saving message ..."))
+
+(defun olm-draft-reply-all-send-message
+  ()
+  (interactive)
+  (olm-draft-reply-all-do-command "Olm.update_message_body_and_send"
+                                  "Olm: sending message ..."))
 
 (add-hook 'olm-draft-reply-all-hook 'olm-message-mode-keyword)
