@@ -2,6 +2,7 @@
 
 (defvar olm-folder-id nil)
 (defvar olm-default-bcc nil)
+(defvar olm-attachment-path nil)
 
 (defun olm
   ()
@@ -195,7 +196,8 @@
   (define-key olm-summary-mode-map "n" 'olm-summary-display-down)
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
-  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all))
+  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
+  (define-key olm-summary-mode-map "\C-c\C-a" 'olm-summary-save-attachments))
 
 (defun olm-summary-inc
   ()
@@ -328,6 +330,12 @@
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
+(defun olm-summary-save-attachments
+  ()
+  (interactive)
+  (olm-do-command (format "Olm.save_attachments(%S, %S)"
+                          (olm-mail-item-entry-id-at)
+                          olm-attachment-path)))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at

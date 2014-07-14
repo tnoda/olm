@@ -40,6 +40,13 @@ module Olm
       res << sprintf("Cc: %s\n", m.CC) if m.CC.to_s.length > 0
       res << sprintf("Subject: %s\n", m.Subject)
       res << sprintf("ReceivedAt: %s\n", m.ReceivedTime)
+      if m.Attachments.Count > 0
+        buf = []
+        m.Attachments.each do |a|
+          buf << a.DisplayName
+        end
+        res << sprintf("Attachments: %s\n", buf.join("; "))
+      end
       res << sprintf("---- \n")
       if m.BodyFormat != OlFormatPlain
         m2 = m.Copy
@@ -125,6 +132,13 @@ module Olm
       m.Body = NKF.nkf('-s -Lw', body)
       m.BCC = bcc if bcc
       m
+    end
+
+    def save_attachments(entry_id, path)
+      @ns.GetItemFromID(entry_id)
+      @ns.Attachments.each do |a|
+        a.SaveAsFile(path)
+      end
     end
 
 
