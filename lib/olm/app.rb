@@ -99,6 +99,7 @@ module Olm
     def create_reply_all_message(entry_id)
       m = @ns.GetItemFromID(entry_id)
       r = m.ReplyAll
+      r.BodyFormat = OlFormatPlain
       r.Save
       r.EntryID
     end
