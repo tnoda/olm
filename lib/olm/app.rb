@@ -1,6 +1,5 @@
 require 'win32ole'
 require 'singleton'
-require 'nkf'
 
 module Olm
   class App
@@ -56,7 +55,7 @@ module Olm
       else
         res << m.Body
       end
-      NKF.nkf('-w -Lu', res)
+      u(res.gsub(/\r\n/, "\n"))
     end
 
     def toggle_task_flag(entry_id)
@@ -124,12 +123,12 @@ module Olm
           header = false if /^---- / =~ line
         else
           body << line
-          body << "\n"
+          body << "\r\n"
         end
       end
       m = @ns.GetItemFromID(entry_id)
       m.BodyFormat = OlFormatPlain
-      m.Body = NKF.nkf('-s -Lw', body)
+      m.Body = w(body)
       m.BCC = bcc if bcc
       m
     end
