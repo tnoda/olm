@@ -89,7 +89,7 @@ module Olm
           end
         else
           x[:body] << line
-          x[:body] << "\n"
+          x[:body] << "\r\n"
         end
       end
       m = @app.CreateItem(OlMailItem)
@@ -97,8 +97,8 @@ module Olm
       m.To = x['To'] if x['To']
       m.CC = x['Cc'] if x['Cc']
       m.BCC = x['Bcc'] if x['Bcc']
-      m.Subject = NKF.nkf('-s', x['Subject']) if x['Subject']
-      m.Body = NKF.nkf('-s -Lw', x[:body]) if x[:body]
+      m.Subject = w(x['Subject']) if x['Subject']
+      m.Body = w(x[:body]) if x[:body]
       m
     end
 
@@ -137,7 +137,7 @@ module Olm
     def save_attachments(entry_id, path)
       m = @ns.GetItemFromID(entry_id)
       m.Attachments.each do |a|
-        a.SaveAsFile(encode(path + a.DisplayName))
+        a.SaveAsFile(w(path + a.DisplayName))
       end
     end
 
@@ -156,7 +156,7 @@ module Olm
       str.encode(Encoding::UTF_8)
     end
 
-    def encode(str)
+    def w(str)
       str.encode(@enc)
     end
   end
