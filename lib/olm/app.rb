@@ -135,9 +135,9 @@ module Olm
     end
 
     def save_attachments(entry_id, path)
-      @ns.GetItemFromID(entry_id)
-      @ns.Attachments.each do |a|
-        a.SaveAsFile(path)
+      m = @ns.GetItemFromID(entry_id)
+      m.Attachments.each do |a|
+        a.SaveAsFile(encode(path + a.DisplayName))
       end
     end
 
@@ -154,6 +154,10 @@ module Olm
 
     def u(str)
       str.encode(Encoding::UTF_8)
+    end
+
+    def encode(str)
+      str.encode(@enc)
     end
   end
 end

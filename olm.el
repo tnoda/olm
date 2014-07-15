@@ -66,7 +66,7 @@
   (command &optional buf)
   (let ((buf (or buf (get-buffer-create "*Messages*"))))
     (call-process "ruby" nil buf nil
-                "-r" "rubygems" "-r" "olm" "-e" command)))
+                  "-r" "rubygems" "-r" "olm" "-e" command)))
 
 (defun olm-sync
   ()
@@ -78,20 +78,19 @@
     (sit-for 1)
     (let ((w 5))
       (--dotimes w
-          (progn
-            (message (number-to-string (- w it)))
-            (sit-for 1))))
+        (progn
+          (message (number-to-string (- w it)))
+          (sit-for 1))))
     (message "done.")))
 
 (defun olm-hide-entry-id-line
   ()
   (interactive)
-  (let ((pos (point)))
+  (save-excursion    
     (narrow-to-region (progn
                         (goto-line 2)
                         (point))
-                      (point-max))
-    (goto-char pos)))
+                      (point-max))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -148,10 +147,15 @@
 (defvar olm-message-mode-map nil)
 (defvar olm-message-mode-hook nil)
 
+(unless olm-message-mode-map
+  (setq olm-message-mode-map (make-sparse-keymap))
+  (define-key olm-message-mode-map "\C-c\C-a" 'olm-message-save-attachments))
+
 (defun olm-message-mode
   ()
   (interactive)
-  (setq major-mode 'olm-summary-mode)
+  (use-local-map olm-message-mode-map)
+  (setq major-mode 'olm-message-mode)
   (setq mode-name "Olm Message")
   (font-lock-mode 1)
   (setq-local buffer-read-only t)
@@ -176,6 +180,28 @@
 
 (add-hook 'olm-message-mode-hook 'olm-message-mode-keyword)
 
+(defun olm-message-save-attachments
+  ()
+  (interactive)
+  (let ((entry-id (olm-message-entry-id)))
+    (message (format "Olm: saving attachements into %S ..."
+                     olm-attachment-path))
+    (olm-do-command (format "Olm.save_attachments(%S, %S)"
+                            entry-id
+                            olm-attachment-path))))
+
+;;; A helper function for olm-message-mode
+(defun olm-message-entry-id
+  ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-line 1)
+      (buffer-substring-no-properties (line-beginning-position)
+                                      (line-end-position)))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; olm-summary
@@ -196,8 +222,7 @@
   (define-key olm-summary-mode-map "n" 'olm-summary-display-down)
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
-  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
-  (define-key olm-summary-mode-map "\C-c\C-a" 'olm-summary-save-attachments))
+  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all))
 
 (defun olm-summary-inc
   ()
@@ -330,12 +355,6 @@
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
-(defun olm-summary-save-attachments
-  ()
-  (interactive)
-  (olm-do-command (format "Olm.save_attachments(%S, %S)"
-                          (olm-mail-item-entry-id-at)
-                          olm-attachment-path)))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at
