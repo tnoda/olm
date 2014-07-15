@@ -217,6 +217,7 @@
   (define-key olm-summary-mode-map "q" 'olm-summary-quit)
   (define-key olm-summary-mode-map "." 'olm-summary-open-message)
   (define-key olm-summary-mode-map " " 'olm-summary-scroll-message-forward)
+  (define-key olm-summary-mode-map "\r" 'olm-summary-scroll-message-forward-line)
   (define-key olm-summary-mode-map [backspace] 'olm-summary-scroll-message-backward)
   (define-key olm-summary-mode-map "p" 'olm-summary-display-up)
   (define-key olm-summary-mode-map "n" 'olm-summary-display-down)
@@ -284,6 +285,12 @@
   (interactive)
   (recenter)
   (scroll-other-window olm-summary-scroll-lines))
+
+(defun olm-summary-scroll-message-forward-line
+  ()
+  (interactive)
+  (recenter)
+  (scroll-other-window 1))
 
 (defun olm-summary-scroll-message-backward
   ()
