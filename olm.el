@@ -3,6 +3,7 @@
 (defvar olm-folder-id nil)
 (defvar olm-default-bcc nil)
 (defvar olm-attachment-path nil)
+(defvar olm-ruby-executable "ruby")
 
 (defun olm
   ()
@@ -60,12 +61,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-;;; gereral helper functions
+;;; general helper functions
 ;;; 
 (defun olm-do-command
   (command &optional buf)
   (let ((buf (or buf (get-buffer-create "*Messages*"))))
-    (call-process "ruby" nil buf nil
+    (call-process olm-ruby-executable nil buf nil
                   "-r" "rubygems" "-r" "olm" "-e" command)))
 
 (defun olm-sync
@@ -184,7 +185,7 @@
   ()
   (interactive)
   (let ((entry-id (olm-message-entry-id)))
-    (message (format "Olm: saving attachements into %S ..."
+    (message (format "Olm: saving attachments into %S ..."
                      olm-attachment-path))
     (olm-do-command (format "Olm.save_attachments(%S, %S)"
                             entry-id
@@ -407,7 +408,8 @@
 (defun olm-draft-do-command
   (command)
   (call-process-region (point-min) (point-max)
-                       "ruby" nil (get-buffer-create "*Messages*") nil
+                       olm-ruby-executable
+                       nil (get-buffer-create "*Messages*") nil
                        "-r" "rubygems" "-r" "olm" "-e" command))
 
 (defun olm-draft-save-message
