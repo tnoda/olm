@@ -16,6 +16,7 @@ module Olm
       f = folder_id ? @ns.GetFolderFromID(folder_id) : default_folder
       res = "#{f.Items.Count}\n"
       f.Items.each do |m|
+        next if m.Class == OlMeetingRequest
         entry_id = m.EntryID
         received_at = m.ReceivedTime.to_s.split(' ').first
         from = m.SenderName
