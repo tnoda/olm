@@ -8,24 +8,30 @@ module Olm
     def initialize
       @app = WIN32OLE.connect("Outlook.Application")
       @ns = @app.Session
-      @enc = @ns.Folders.GetFirst.Name.encoding
       const_load(self.class)
     end
 
     def ls(folder_id = nil)
       f = folder_id ? @ns.GetFolderFromID(folder_id) : default_folder
-      res = "#{f.Items.Count}\n"
-      f.Items.each do |m|
-        next if m.Class == OlMeetingRequest
+      n = [f.Items.Count, 30].min
+      s = f.Items.Count - n + 1
+      t = f.Items.Count
+      res = []
+      s.upto(t) do |i|
+        m = f.Items(i)
+        unless m.Class == OlMail
+          n -= 1
+          next
+        end
         entry_id = m.EntryID
         received_at = m.ReceivedTime.to_s.split(' ').first
         from = m.SenderName
         subject = m.Subject
         flag = m.IsMarkedAsTask ? '!' : ' '
-        res << sprintf("%s %s  %-12.12s  %-20.20s %s\n",
-          entry_id, flag, received_at, u(from), u(subject))
+        res << sprintf("%s %s  %-12.12s  %-20.20s %s",
+          entry_id, flag, received_at, from, subject)
       end
-      res
+      res.unshift(n.to_s)
     end
 
     def send_and_receive
@@ -34,29 +40,29 @@ module Olm
 
     def message(entry_id)
       m = @ns.GetItemFromID(entry_id)
-      res = entry_id + "\n"
-      res << sprintf("From: %s\n", m.SenderName)
-      res << sprintf("To: %s\n", m.To)
-      res << sprintf("Cc: %s\n", m.CC) if m.CC.to_s.length > 0
-      res << sprintf("Subject: %s\n", m.Subject)
-      res << sprintf("ReceivedAt: %s\n", m.ReceivedTime)
+      res = []
+      res << sprintf("From: %s", m.SenderName)
+      res << sprintf("To: %s", m.To)
+      res << sprintf("Cc: %s", m.CC) if m.CC.to_s.length > 0
+      res << sprintf("Subject: %s", m.Subject)
+      res << sprintf("ReceivedAt: %s", m.ReceivedTime)
       if m.Attachments.Count > 0
         buf = []
         m.Attachments.each do |a|
           buf << a.DisplayName
         end
-        res << sprintf("Attachments: %s\n", buf.join("; "))
+        res << sprintf("Attachments: %s", buf.join("; "))
       end
-      res << sprintf("---- \n")
+      res << sprintf("---- ")
       if m.BodyFormat != OlFormatPlain
         m2 = m.Copy
         m2.BodyFormat = OlFormatPlain
-        res << m2.Body
+        res << m2.Body.split("\r\n")
         m2.Move(@ns.GetDefaultFolder(OlFolderDeletedItems))
       else
-        res << m.Body
+        res << m.Body.split("\r\n")
       end
-      u(res.gsub(/\r\n/, "\n"))
+      res
     end
 
     def toggle_task_flag(entry_id)
@@ -78,7 +84,7 @@ module Olm
     def create_message(io)
       x = {:body => ''}
       header = true
-      io.set_encoding(Encoding::UTF_8).each_line do |line|
+      io.each_line do |line|
         line.chomp!
         if header
           if /^---- / =~ line
@@ -97,8 +103,8 @@ module Olm
       m.To = x['To'] if x['To']
       m.CC = x['Cc'] if x['Cc']
       m.BCC = x['Bcc'] if x['Bcc']
-      m.Subject = w(x['Subject']) if x['Subject']
-      m.Body = w(x[:body]) if x[:body]
+      m.Subject = x['Subject'] if x['Subject']
+      m.Body = x[:body] if x[:body]
       m
     end
 
@@ -115,7 +121,7 @@ module Olm
       header = true
       bcc = nil
       body = ''
-      io.set_encoding(Encoding::UTF_8).each_line do |line|
+      io.each_line do |line|
         line.chomp!
         if entry_id.nil?
           entry_id = line
@@ -129,7 +135,7 @@ module Olm
       end
       m = @ns.GetItemFromID(entry_id)
       m.BodyFormat = OlFormatPlain
-      m.Body = w(body)
+      m.Body = body
       m.BCC = bcc if bcc
       m
     end
@@ -137,7 +143,7 @@ module Olm
     def save_attachments(entry_id, path)
       m = @ns.GetItemFromID(entry_id)
       m.Attachments.each do |a|
-        a.SaveAsFile(w(path + a.DisplayName))
+        a.SaveAsFile(path + a.DisplayName)
       end
     end
 
@@ -150,14 +156,6 @@ module Olm
 
     def default_folder
       @ns.GetDefaultFolder(OlFolderInbox)
-    end
-
-    def u(str)
-      str.encode(Encoding::UTF_8)
-    end
-
-    def w(str)
-      str.encode(@enc)
     end
   end
 end

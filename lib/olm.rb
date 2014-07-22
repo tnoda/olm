@@ -10,7 +10,9 @@ module Olm
   end
 
   def ls(folder_id = nil)
-    puts app.ls(folder_id)
+    app.ls(folder_id).each do |line|
+      $stdout.puts(line)
+    end
   end
 
   def send_and_receive
@@ -18,7 +20,9 @@ module Olm
   end
 
   def message(entry_id)
-    puts app.message(entry_id)
+    app.message(entry_id).each do |line|
+      $stdout.puts line
+    end
   end
 
   def toggle_task_flag(entry_id)

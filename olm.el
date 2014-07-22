@@ -5,6 +5,21 @@
 (defvar olm-attachment-path nil)
 (defvar olm-ruby-executable "ruby")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; olm-folder-alist
+;;; 
+(defvar olm-folder-alist nil)
+
+(defun olm-folder-names
+  ()
+  (--map (car it) olm-folder-alist))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;;  olm command
+;;; 
 (defun olm
   ()
   (interactive)
@@ -103,7 +118,10 @@
 
 (defun olm-buf-summary
   ()
-  (get-buffer-create "*olm-summary*"))
+  (let ((buf (get-buffer-create "*olm-summary*")))
+    (with-current-buffer buf
+      (setq-local inherit-process-coding-system t))
+    buf))
 
 (defun olm-buf-entry-ids
   ()
@@ -224,7 +242,8 @@
   (define-key olm-summary-mode-map "n" 'olm-summary-display-down)
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
-  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all))
+  (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
+  (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder))
 
 (defun olm-summary-inc
   ()
@@ -259,8 +278,6 @@
          (entry-id (progn
                      (goto-line ln0)
                      (olm-mail-item-entry-id-at))))
-    (with-current-buffer mbuf
-      (setq-local buffer-file-coding-system 'utf-8-dos))
     (olm-do-command (format "Olm.message %S" entry-id) mbuf)
     (with-current-buffer mbuf
       (let ((inhibit-read-only t))
@@ -363,6 +380,13 @@
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
+(defun olm-summary-goto-folder
+  ()
+  (interactive)
+  (let ((name (completing-read "Exchange folder: " (olm-folder-names)
+                               nil t)))
+    (setq olm-folder-id (assoc-default name olm-folder-alist))
+    (olm-scan)))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at
