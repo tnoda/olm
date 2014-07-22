@@ -273,7 +273,7 @@
   (interactive)
   (delete-other-windows-vertically)
   (let* ((ln0 (line-number-at-pos))
-         (msg-window (split-window-below 10))
+         (msg-window (split-window-below 12))
          (mbuf (olm-buf-message))
          (entry-id (progn
                      (goto-line ln0)
