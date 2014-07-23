@@ -40,7 +40,7 @@ module Olm
 
     def message(entry_id)
       m = @ns.GetItemFromID(entry_id)
-      res = []
+      res = [entry_id]
       res << sprintf("From: %s", m.SenderName)
       res << sprintf("To: %s", m.To)
       res << sprintf("Cc: %s", m.CC) if m.CC.to_s.length > 0
