@@ -1,6 +1,7 @@
 (require 'dash)
 
 (defvar olm-folder-id nil)
+(defvar olm-folder-name nil)
 (defvar olm-default-bcc nil)
 (defvar olm-attachment-path nil)
 (defvar olm-ruby-executable "ruby")
@@ -15,6 +16,10 @@
   ()
   (--map (car it) olm-folder-alist))
 
+(unless olm-folder-id
+  (setq olm-folder-id (cadr olm-folder-alist)))
+(unless olm-folder-name
+  (setq olm-folder-name (caar olm-folder-alist)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -23,7 +28,15 @@
 (defun olm
   ()
   (interactive)
+  (olm-init)
   (olm-scan))
+
+(defun olm-init
+  ()
+  (unless olm-folder-id
+    (setq olm-folder-id (cadr olm-folder-alist)))
+  (unless olm-folder-name
+    (setq olm-folder-name (caar olm-folder-alist))))
 
 (defun olm-scan
   ()
@@ -175,7 +188,7 @@
   (interactive)
   (use-local-map olm-message-mode-map)
   (setq major-mode 'olm-message-mode)
-  (setq mode-name "Olm Message")
+  (setq mode-name (format "Olm Message [%s]" olm-folder-name))
   (font-lock-mode 1)
   (setq-local buffer-read-only t)
   (setq-local line-move-ignore-invisible t)
@@ -383,10 +396,12 @@
 (defun olm-summary-goto-folder
   ()
   (interactive)
-  (let ((name (completing-read "Exchange folder: " (olm-folder-names)
-                               nil t)))
-    (setq olm-folder-id (assoc-default name olm-folder-alist))
-    (olm-scan)))
+  (setq olm-folder-name (completing-read "Exchange folder: "
+                                         (olm-folder-names)
+                                         nil
+                                         t))
+  (setq olm-folder-id (assoc-default olm-folder-name olm-folder-alist))
+  (olm-scan))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at
