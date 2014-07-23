@@ -9,6 +9,10 @@ module Olm
     Olm::App.instance
   end
 
+  def default_folder_id
+    puts app.default_folder_id
+  end
+
   def ls(folder_id = nil)
     app.ls(folder_id).each do |line|
       $stdout.puts(line)

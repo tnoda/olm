@@ -34,9 +34,11 @@
 (defun olm-init
   ()
   (unless olm-folder-id
-    (setq olm-folder-id (cadr olm-folder-alist)))
-  (unless olm-folder-name
-    (setq olm-folder-name (caar olm-folder-alist))))
+    (setq olm-folder-id (cadr olm-folder-alist)
+          olm-folder-name (caar olm-folder-alist)))
+  (unless olm-folder-id
+    (setq olm-folder-id (olm-default-folder-id)
+          olm-folder-name "inbox")))
 
 (defun olm-scan
   ()
@@ -120,6 +122,13 @@
                         (goto-line 2)
                         (point))
                       (point-max))))
+
+(defun olm-default-folder-id
+  ()
+  (with-current-buffer (get-buffer-create "*olm-default-folder-id*")
+    (erase-buffer)
+    (olm-do-command "Olm.default_folder_id" (current-buffer))
+    (buffer-substring-no-properties (point-min) (1- (point-max)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

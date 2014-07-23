@@ -11,6 +11,10 @@ module Olm
       const_load(self.class)
     end
 
+    def default_folder_id
+      @ns.GetDefaultFolder(OlFolderInbox).EntryID
+    end
+
     def ls(folder_id = nil)
       f = folder_id ? @ns.GetFolderFromID(folder_id) : default_folder
       n = [f.Items.Count, 30].min
