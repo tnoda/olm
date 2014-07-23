@@ -494,8 +494,7 @@
   (message msg)
   (save-restriction
     (widen)
-    (olm-draft-do-command cmd))
-  (olm-draft-kill))
+    (olm-draft-do-command cmd)))
 
 (defun olm-draft-reply-all-save-message
   ()
