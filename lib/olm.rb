@@ -61,4 +61,8 @@ module Olm
   def save_attachments(entry_id, path)
     app.save_attachments(entry_id, path)
   end
+
+  def move(from, to)
+    app.move(from, to)
+  end
 end

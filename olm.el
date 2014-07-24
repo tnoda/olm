@@ -265,7 +265,8 @@
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
   (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
-  (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder))
+  (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
+  (define-key olm-summary-mode-map "o" 'olm-summary-refile))
 
 (defun olm-summary-inc
   ()
@@ -411,6 +412,21 @@
                                          t))
   (setq olm-folder-id (assoc-default olm-folder-name olm-folder-alist))
   (olm-scan))
+
+(defun olm-summary-refile
+  ()
+  (interactive)
+  (let* ((from (olm-mail-item-entry-id-at))
+         (folder-name (completing-read "Refile to: "
+                                       (olm-folder-names)
+                                       nil
+                                       t))
+         (to (assoc-default folder-name olm-folder-alist)))
+    (message "Refiling the message to %s ..." folder-name)
+    (olm-do-command (format "Olm.move(%S, %S)" from to))
+    (let ((n (line-number-at-pos)))
+      (olm-scan)
+      (goto-line n))))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at
