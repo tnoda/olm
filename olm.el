@@ -525,12 +525,14 @@
   ()
   (interactive)
   (olm-draft-reply-all-do-command "Olm.update_message_body_and_save"
-                                  "Olm: saving message ..."))
+                                  "Olm: saving message ...")
+  (olm-draft-kill))
 
 (defun olm-draft-reply-all-send-message
   ()
   (interactive)
   (olm-draft-reply-all-do-command "Olm.update_message_body_and_send"
-                                  "Olm: sending message ..."))
+                                  "Olm: sending message ...")
+  (olm-draft-kill))
 
 (add-hook 'olm-draft-reply-all-hook 'olm-message-mode-keyword)
