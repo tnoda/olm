@@ -1,4 +1,5 @@
-(require 'dash)
+(eval-when-compile
+  (require 'dash))
 
 (defvar olm-folder-id nil)
 (defvar olm-folder-name nil)
