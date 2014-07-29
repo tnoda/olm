@@ -212,6 +212,7 @@
      ("^Cc:" . font-lock-keyword-face)
      ("^Subject:" . font-lock-keyword-face)
      ("^ReceivedAt:" . font-lock-keyword-face)
+     ("^Attachments:" . font-lock-keyword-face)
      ("^> .*$" . font-lock-comment-face)
      ("^From: \\(.*\\)$" 1 font-lock-warning-face)
      ("^To: \\(.*\\)$" 1 font-lock-negation-char-face)
