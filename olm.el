@@ -13,8 +13,7 @@
 ;;; 
 (defvar olm-folder-alist nil)
 
-(defun olm-folder-names
-  ()
+(defun olm-folder-names ()
   (--map (car it) olm-folder-alist))
 
 (unless olm-folder-id
@@ -26,14 +25,12 @@
 ;;;
 ;;;  olm command
 ;;; 
-(defun olm
-  ()
+(defun olm ()
   (interactive)
   (olm-init)
   (olm-scan))
 
-(defun olm-init
-  ()
+(defun olm-init ()
   (unless olm-folder-id
     (setq olm-folder-id (cadr olm-folder-alist)
           olm-folder-name (caar olm-folder-alist)))
@@ -41,8 +38,7 @@
     (setq olm-folder-id (olm-default-folder-id)
           olm-folder-name "inbox")))
 
-(defun olm-scan
-  ()
+(defun olm-scan ()
   (interactive)
   (let* ((ret (olm-ls))
          (lbuf (olm-buf-ls))
@@ -79,8 +75,7 @@
     (switch-to-buffer sbuf)))
 
 ;;; A helper function invoked by olm-scan
-(defun olm-ls
-  ()
+(defun olm-ls ()
   (with-current-buffer (olm-buf-ls)
     (setq-local buffer-read-only nil)
     (erase-buffer)
@@ -94,14 +89,12 @@
 ;;;
 ;;; general helper functions
 ;;; 
-(defun olm-do-command
-  (command &optional buf)
+(defun olm-do-command (command &optional buf)
   (let ((buf (or buf (get-buffer-create "*Messages*"))))
     (call-process olm-ruby-executable nil buf nil
                   "-r" "rubygems" "-r" "olm" "-e" command)))
 
-(defun olm-sync
-  ()
+(defun olm-sync ()
   (interactive)
   (with-current-buffer (get-buffer-create "*olm-sync*")
     (message "Olm: synchronizing all objects ...")
@@ -115,8 +108,7 @@
           (sit-for 1))))
     (message "done.")))
 
-(defun olm-hide-entry-id-line
-  ()
+(defun olm-hide-entry-id-line ()
   (interactive)
   (save-excursion    
     (narrow-to-region (progn
@@ -124,8 +116,7 @@
                         (point))
                       (point-max))))
 
-(defun olm-default-folder-id
-  ()
+(defun olm-default-folder-id ()
   (with-current-buffer (get-buffer-create "*olm-default-folder-id*")
     (erase-buffer)
     (olm-do-command "Olm.default_folder_id" (current-buffer))
@@ -135,31 +126,26 @@
 ;;;
 ;;; buffers
 ;;; 
-(defun olm-buf-ls
-  ()
+(defun olm-buf-ls ()
   (get-buffer-create "*olm-ls*"))
 
-(defun olm-buf-summary
-  ()
+(defun olm-buf-summary ()
   (let ((buf (get-buffer-create "*olm-summary*")))
     (with-current-buffer buf
       (setq-local inherit-process-coding-system t))
     buf))
 
-(defun olm-buf-entry-ids
-  ()
+(defun olm-buf-entry-ids ()
   (get-buffer-create "*olm-entry-ids*"))
 
-(defun olm-buf-message
-  ()
+(defun olm-buf-message ()
   (let ((buf (get-buffer-create "*olm-message*")))
     (with-current-buffer buf
       (setq-local buffer-read-only nil)
       (erase-buffer))
     buf))
 
-(defun olm-buf-draft
-  ()
+(defun olm-buf-draft ()
   (let ((buf (get-buffer-create "*olm-draft*")))
     (with-current-buffer buf
       (setq-local buffer-read-only nil)
@@ -173,8 +159,7 @@
       (insert "---- \n"))
     buf))
 
-(defun olm-buf-draft-reply-all
-  ()
+(defun olm-buf-draft-reply-all ()
   (let ((buf (get-buffer-create "*olm-draft-reply-all*")))
     (with-current-buffer buf
       (setq-local buffer-read-only nil)
@@ -193,8 +178,7 @@
   (setq olm-message-mode-map (make-sparse-keymap))
   (define-key olm-message-mode-map "\C-c\C-a" 'olm-message-save-attachments))
 
-(defun olm-message-mode
-  ()
+(defun olm-message-mode ()
   (interactive)
   (use-local-map olm-message-mode-map)
   (setq major-mode 'olm-message-mode)
@@ -204,8 +188,7 @@
   (setq-local line-move-ignore-invisible t)
   (run-hooks 'olm-message-mode-hook))
 
-(defun olm-message-mode-keyword
-  ()
+(defun olm-message-mode-keyword ()
   (font-lock-add-keywords
    nil
    '(("^From:" . font-lock-keyword-face)
@@ -223,8 +206,7 @@
 
 (add-hook 'olm-message-mode-hook 'olm-message-mode-keyword)
 
-(defun olm-message-save-attachments
-  ()
+(defun olm-message-save-attachments ()
   (interactive)
   (let ((entry-id (olm-message-entry-id)))
     (message (format "Olm: saving attachments into %S ..."
@@ -234,8 +216,7 @@
                             olm-attachment-path))))
 
 ;;; A helper function for olm-message-mode
-(defun olm-message-entry-id
-  ()
+(defun olm-message-entry-id ()
   (interactive)
   (save-excursion
     (save-restriction
@@ -270,20 +251,17 @@
   (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
   (define-key olm-summary-mode-map "o" 'olm-summary-refile))
 
-(defun olm-summary-inc
-  ()
+(defun olm-summary-inc ()
   (interactive)
   (olm-sync)
   (olm-scan))
 
-(defun olm-summary-quit
-  ()
+(defun olm-summary-quit ()
   (interactive)
   (delete-other-windows-vertically)
   (quit-window))
 
-(defun olm-summary-mode
-  ()
+(defun olm-summary-mode ()
   (interactive)
   (use-local-map olm-summary-mode-map)
   (setq major-mode 'olm-summary-mode)
@@ -293,8 +271,7 @@
   (setq-local line-move-ignore-invisible t)
   (run-hooks 'olm-summary-mode-hook))
 
-(defun olm-summary-open-message
-  ()
+(defun olm-summary-open-message ()
   (interactive)
   (delete-other-windows-vertically)
   (let* ((ln0 (line-number-at-pos))
@@ -318,45 +295,38 @@
     (set-window-buffer msg-window mbuf)
     (olm-summary-mark-message-as-read)))
 
-(defun olm-summary-mark-message-as-read
-  ()
+(defun olm-summary-mark-message-as-read ()
   (interactive)
   (olm-do-command (format "Olm.mark_as_read %S" (olm-mail-item-entry-id-at))))
 
-(defun olm-summary-scroll-message-forward
-  ()
+(defun olm-summary-scroll-message-forward ()
   (interactive)
   (recenter)
   (scroll-other-window olm-summary-scroll-lines))
 
-(defun olm-summary-scroll-message-forward-line
-  ()
+(defun olm-summary-scroll-message-forward-line ()
   (interactive)
   (recenter)
   (scroll-other-window 1))
 
-(defun olm-summary-scroll-message-backward
-  ()
+(defun olm-summary-scroll-message-backward ()
   (interactive)
   (recenter)
   (scroll-other-window (- olm-summary-scroll-lines)))
 
-(defun olm-summary-display-up
-  ()
+(defun olm-summary-display-up ()
   (interactive)
   (forward-line -1)
   (recenter)
   (olm-summary-open-message))
 
-(defun olm-summary-display-down
-  ()
+(defun olm-summary-display-down ()
   (interactive)
   (forward-line 1)
   (recenter)
   (olm-summary-open-message))
 
-(defun olm-summary-toggle-flag
-  ()
+(defun olm-summary-toggle-flag ()
   (interactive)
   (let ((n (line-number-at-pos)))
     (olm-do-command (format "Olm.toggle_task_flag %S"
@@ -364,8 +334,7 @@
     (olm-scan)
     (goto-line n)))
 
-(defun olm-summary-write
-  ()
+(defun olm-summary-write ()
   (interactive)
   (delete-other-windows-vertically)
   (let ((buf (olm-buf-draft)))
@@ -374,8 +343,7 @@
       (olm-draft-mode))
     (switch-to-buffer buf)))
 
-(defun olm-summary-reply-all
-  ()
+(defun olm-summary-reply-all ()
   (interactive)
   (let ((entry-id (olm-mail-item-entry-id-at))
         (buf (olm-buf-draft-reply-all)))
@@ -405,8 +373,7 @@
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
-(defun olm-summary-goto-folder
-  ()
+(defun olm-summary-goto-folder ()
   (interactive)
   (setq olm-folder-name (completing-read "Exchange folder: "
                                          (olm-folder-names)
@@ -415,8 +382,7 @@
   (setq olm-folder-id (assoc-default olm-folder-name olm-folder-alist))
   (olm-scan))
 
-(defun olm-summary-refile
-  ()
+(defun olm-summary-refile ()
   (interactive)
   (let* ((from (olm-mail-item-entry-id-at))
          (folder-name (completing-read "Refile to: "
@@ -431,8 +397,7 @@
       (goto-line n))))
 
 ;;; A helper function for olm-summary-mode functions.
-(defun olm-mail-item-entry-id-at
-  ()
+(defun olm-mail-item-entry-id-at ()
   (interactive)
   (let ((n (line-number-at-pos)))
     (with-current-buffer (olm-buf-entry-ids)
@@ -453,8 +418,7 @@
   (define-key olm-draft-mode-map "\C-c\C-c" 'olm-draft-send-message)
   (define-key olm-draft-mode-map "\C-c\C-s" 'olm-draft-save-message))
 
-(defun olm-draft-mode
-  ()
+(defun olm-draft-mode ()
   (interactive)
   (setq major-mode 'olm-draft-mode)
   (setq mode-name "Olm Draft")
@@ -465,28 +429,24 @@
 
 (add-hook 'olm-draft-mode-hook 'olm-message-mode-keyword)
 
-(defun olm-draft-kill
-  ()
+(defun olm-draft-kill ()
   (interactive)
   (kill-buffer)
   (olm-scan))
 
-(defun olm-draft-do-command
-  (command)
+(defun olm-draft-do-command (command)
   (call-process-region (point-min) (point-max)
                        olm-ruby-executable
                        nil (get-buffer-create "*Messages*") nil
                        "-r" "rubygems" "-r" "olm" "-e" command))
 
-(defun olm-draft-save-message
-  ()
+(defun olm-draft-save-message ()
   (interactive)
   (message "Olm: saving message ...")
   (olm-draft-do-command "Olm.save_message")
   (olm-draft-kill))
 
-(defun olm-draft-send-message
-  ()
+(defun olm-draft-send-message ()
   (interactive)
   (message "Olm: sending message ...")
   (olm-draft-do-command "Olm.send_message")
@@ -506,8 +466,7 @@
   (define-key olm-draft-reply-all-map "\C-c\C-c" 'olm-draft-reply-all-send-message)
   (define-key olm-draft-reply-all-map "\C-c\C-s" 'olm-draft-reply-all-save-message))
 
-(defun olm-draft-reply-all-mode
-  ()
+(defun olm-draft-reply-all-mode ()
   (interactive)
   (setq major-mode 'olm-draft-reply-all-mode)
   (setq mode-name "Olm Draft Reply All")
@@ -516,22 +475,19 @@
   (use-local-map olm-draft-reply-all-map)
   (run-hooks 'olm-draft-reply-all-hook))
 
-(defun olm-draft-reply-all-do-command
-  (cmd msg)
+(defun olm-draft-reply-all-do-command (cmd msg)
   (message msg)
   (save-restriction
     (widen)
     (olm-draft-do-command cmd)))
 
-(defun olm-draft-reply-all-save-message
-  ()
+(defun olm-draft-reply-all-save-message ()
   (interactive)
   (olm-draft-reply-all-do-command "Olm.update_message_body_and_save"
                                   "Olm: saving message ...")
   (olm-draft-kill))
 
-(defun olm-draft-reply-all-send-message
-  ()
+(defun olm-draft-reply-all-send-message ()
   (interactive)
   (olm-draft-reply-all-do-command "Olm.update_message_body_and_send"
                                   "Olm: sending message ...")
