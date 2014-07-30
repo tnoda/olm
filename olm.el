@@ -394,7 +394,8 @@
     (olm-do-command (format "Olm.move(%S, %S)" from to))
     (let ((n (line-number-at-pos)))
       (olm-scan)
-      (goto-line n))))
+      (goto-line n))
+    (olm-summary-open-message)))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-mail-item-entry-id-at ()
