@@ -160,11 +160,7 @@
     buf))
 
 (defun olm-buf-draft-reply-all ()
-  (let ((buf (get-buffer-create "*olm-draft-reply-all*")))
-    (with-current-buffer buf
-      (setq-local buffer-read-only nil)
-      (erase-buffer))
-    buf))
+  (generate-new-buffer "*olm-draft-reply-all*"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
