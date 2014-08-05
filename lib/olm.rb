@@ -47,7 +47,7 @@ module Olm
 
   def create_reply_all_message(entry_id)
     reply_mail_entry_id = app.create_reply_all_message(entry_id)
-    puts message(reply_mail_entry_id)
+    message(reply_mail_entry_id)
   end
 
   def update_message_body_and_save
