@@ -110,6 +110,13 @@
 
 (defun olm-hide-entry-id-line ()
   (interactive)
+  (let ((inhibit-read-only t))
+    (put-text-property (progn
+                         (goto-char (point-min))
+                         (point))
+                       (line-end-position)
+                       'read-only
+                       nil))
   (save-excursion    
     (narrow-to-region (progn
                         (goto-line 2)
@@ -272,24 +279,11 @@
   (delete-other-windows-vertically)
   (let* ((ln0 (line-number-at-pos))
          (msg-window (split-window-below 12))
-         (mbuf (olm-buf-message))
          (entry-id (progn
                      (goto-line ln0)
                      (olm-mail-item-entry-id-at))))
-    (olm-do-command (format "Olm.message %S" entry-id) mbuf)
-    (with-current-buffer mbuf
-      (let ((inhibit-read-only t))
-        (put-text-property (progn
-                             (goto-char (point-min))
-                             (point))
-                           (line-end-position)
-                           'read-only
-                           nil))
-      (olm-hide-entry-id-line)
-      (olm-message-mode)
-      (goto-char (point-min)))
-    (set-window-buffer msg-window mbuf)
-    (olm-summary-mark-message-as-read)))
+    (olm-open-message entry-id msg-window))
+  (olm-summary-mark-message-as-read))
 
 (defun olm-summary-mark-message-as-read ()
   (interactive)
@@ -401,6 +395,17 @@
       (goto-line n)
       (buffer-substring (line-beginning-position) (line-end-position)))))
 
+(defun olm-open-message (entry-id &optional window)
+  (let ((mbuf (olm-buf-message)))
+    (with-current-buffer  mbuf
+      (olm-do-command (format "Olm.message %S" entry-id) t)
+      (let ((inhibit-read-only t))
+        (olm-hide-entry-id-line)
+        (olm-message-mode)
+        (goto-char (point-min))))
+    (if window
+        (set-window-buffer window mbuf)
+      (switch-to-buffer mbuf))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
