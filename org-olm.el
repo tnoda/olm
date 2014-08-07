@@ -50,8 +50,8 @@
      :description (org-olm-store-link-description))))
 
 (defun org-olm-store-link-message ()
-  (message "org-olm-store-link-message has not been implemented yet")
-  nil)
+  (when (eq major-mode 'olm-message-mode)
+    (error "org-olm-store-link-message has not been implemented yet")))
 
 (defun org-olm-store-link-description ()
   (with-current-buffer (get-buffer "*olm-message*")
