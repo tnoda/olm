@@ -35,7 +35,7 @@
 ;;; Implementation
 (defun org-olm-open (path)
   "Follow an Outlook Mail message link specified by PATH."
-  (error "org-olm-open has not been implemented yet"))
+  (olm-open-message (org-no-properties path)))
 
 (defun org-olm-store-link ()
   "Store a link to an Outlook Mail message."
