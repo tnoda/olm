@@ -423,7 +423,7 @@
 
 (defun olm-open-message (entry-id &optional window)
   (let ((mbuf (olm-buf-message)))
-    (with-current-buffer  mbuf
+    (with-current-buffer mbuf
       (olm-do-command (format "Olm.message %S" entry-id) t)
       (let ((inhibit-read-only t))
         (olm-hide-entry-id-line)
