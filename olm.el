@@ -307,13 +307,13 @@
          (msg-window (split-window-below 12))
          (entry-id (progn
                      (goto-line ln0)
-                     (olm-mail-item-entry-id-at))))
+                     (olm-summary-message-entry-id))))
     (olm-open-message entry-id msg-window))
   (olm-summary-mark-message-as-read))
 
 (defun olm-summary-mark-message-as-read ()
   (interactive)
-  (olm-do-command (format "Olm.mark_as_read %S" (olm-mail-item-entry-id-at))))
+  (olm-do-command (format "Olm.mark_as_read %S" (olm-summary-message-entry-id))))
 
 (defun olm-summary-scroll-message-forward ()
   (interactive)
@@ -346,7 +346,7 @@
   (interactive)
   (let ((n (line-number-at-pos)))
     (olm-do-command (format "Olm.toggle_task_flag %S"
-                            (olm-mail-item-entry-id-at)))
+                            (olm-summary-message-entry-id)))
     (olm-scan)
     (goto-line n)))
 
@@ -361,7 +361,7 @@
 
 (defun olm-summary-reply-all ()
   (interactive)
-  (let ((entry-id (olm-mail-item-entry-id-at))
+  (let ((entry-id (olm-summary-message-entry-id))
         (buf (olm-buf-draft-reply-all)))
     (olm-do-command (format "Olm.create_reply_all_message %S" entry-id)
                     buf)
@@ -400,7 +400,7 @@
 
 (defun olm-summary-refile ()
   (interactive)
-  (let* ((from (olm-mail-item-entry-id-at))
+  (let* ((from (olm-summary-message-entry-id))
          (folder-name (completing-read "Refile to: "
                                        (olm-folder-names)
                                        nil
@@ -414,7 +414,7 @@
     (olm-summary-open-message)))
 
 ;;; A helper function for olm-summary-mode functions.
-(defun olm-mail-item-entry-id-at ()
+(defun olm-summary-message-entry-id (&optional at)
   (interactive)
   (let ((n (line-number-at-pos)))
     (with-current-buffer (olm-buf-entry-ids)
