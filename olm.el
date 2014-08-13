@@ -405,13 +405,20 @@
                                        (olm-folder-names)
                                        nil
                                        t))
-         (to (assoc-default folder-name olm-folder-alist)))
-    (message "Refiling the message to %s ..." folder-name)
-    (olm-do-command (format "Olm.move(%S, %S)" from to))
-    (let ((n (line-number-at-pos)))
-      (olm-scan)
-      (goto-line n))
-    (olm-summary-open-message)))
+         (to (assoc-default folder-name olm-folder-alist))
+         (n (line-number-at-pos)))
+    ;; insert the destination entry id into the org-ids buffer
+    (with-current-buffer (olm-buf-entry-ids)
+      (goto-line n)
+      (re-search-forward "^[0-9A-Z]\\{140\\}")
+      (delete-region (point) (point-at-eol))
+      (insert " " to))
+    ;; insert `o' mark at the beginning of the line
+    (beginning-of-line)
+    (setq-local buffer-read-only nil)
+    (delete-char 1)
+    (insert "o")
+    (setq-local buffer-read-only t)))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
