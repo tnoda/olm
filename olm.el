@@ -414,12 +414,13 @@
     (olm-summary-open-message)))
 
 ;;; A helper function for olm-summary-mode functions.
-(defun olm-summary-message-entry-id (&optional at)
-  (interactive)
+(defun olm-summary-message-entry-id ()
+  ()
   (let ((n (line-number-at-pos)))
     (with-current-buffer (olm-buf-entry-ids)
       (goto-line n)
-      (buffer-substring (line-beginning-position) (line-end-position)))))
+      (re-search-forward "\\b[0-9A-Z]\\{140\\}\\b" nil t)
+      (match-string-no-properties 0))))
 
 (defun olm-open-message (entry-id &optional window)
   (let ((mbuf (olm-buf-message)))
