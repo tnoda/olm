@@ -295,10 +295,18 @@
   (use-local-map olm-summary-mode-map)
   (setq major-mode 'olm-summary-mode)
   (setq mode-name (format "Olm Summary [%s]" olm-folder-name))
+  (font-lock-mode 1)
   (setq-local buffer-read-only t)
   (setq-local truncate-lines t)
   (setq-local line-move-ignore-invisible t)
   (run-hooks 'olm-summary-mode-hook))
+
+(defun olm-summary-mode-keyword ()
+  (font-lock-add-keywords
+   nil
+   '(("^o.*$" . font-lock-builtin-face))))
+
+(add-hook 'olm-summary-mode-hook 'olm-summary-mode-keyword)
 
 (defun olm-summary-open-message ()
   (interactive)
