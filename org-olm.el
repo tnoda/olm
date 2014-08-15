@@ -46,7 +46,7 @@
   (when (eq major-mode 'olm-summary-mode)
     (org-store-link-props
      :type "olm"
-     :link (concat "olm:" (olm-mail-item-entry-id-at))
+     :link (concat "olm:" (olm-summary-message-entry-id))
      :description (org-olm-store-link-description))))
 
 (defun org-olm-store-link-message ()
