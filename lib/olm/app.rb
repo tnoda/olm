@@ -11,8 +11,12 @@ module Olm
       const_load(self.class)
     end
 
-    def default_folder_id
-      @ns.GetDefaultFolder(OlFolderInbox).EntryID
+    def default_folder
+      @ns.GetDefaultFolder(OlFolderInbox)
+    end
+
+    def deleted_items_folder
+      @ns.GetDefaultFolder(OlFolderDeletedItems)
     end
 
     def ls(folder_id = nil)
@@ -62,7 +66,7 @@ module Olm
         m2 = m.Copy
         m2.BodyFormat = OlFormatPlain
         res << m2.Body.split("\r\n")
-        m2.Move(@ns.GetDefaultFolder(OlFolderDeletedItems))
+        m2.Move(deleted_items_folder)
       else
         res << m.Body.split("\r\n")
       end
@@ -161,10 +165,6 @@ module Olm
 
     def const_load(klass)
       WIN32OLE.const_load(@app, klass)
-    end
-
-    def default_folder
-      @ns.GetDefaultFolder(OlFolderInbox)
     end
   end
 end

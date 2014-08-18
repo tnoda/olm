@@ -10,7 +10,11 @@ module Olm
   end
 
   def default_folder_id
-    puts app.default_folder_id
+    puts app.default_folder.EntryID
+  end
+
+  def deleted_items_folder_id
+    puts app.deleted_items_folder.EntryID
   end
 
   def ls(folder_id = nil)
