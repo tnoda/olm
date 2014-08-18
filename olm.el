@@ -32,6 +32,7 @@
 (defvar olm-default-bcc nil)
 (defvar olm-attachment-path nil)
 (defvar olm-ruby-executable "ruby")
+(defvar olm-deleted-items-folder-id nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -62,7 +63,9 @@
           olm-folder-name (caar olm-folder-alist)))
   (unless olm-folder-id
     (setq olm-folder-id (olm-default-folder-id)
-          olm-folder-name "inbox")))
+          olm-folder-name "inbox"))
+  (unless olm-deleted-items-folder-id
+    (setq olm-deleted-items-folder-id (olm-deleted-items-folder-id))))
 
 (defun olm-scan ()
   (interactive)
@@ -153,6 +156,12 @@
   (with-current-buffer (get-buffer-create "*olm-default-folder-id*")
     (erase-buffer)
     (olm-do-command "Olm.default_folder_id" (current-buffer))
+    (buffer-substring-no-properties (point-min) (1- (point-max)))))
+
+(defun olm-deleted-items-folder-id ()
+  (with-current-buffer (get-buffer-create "*olm-deleted-items-folder-id*")
+    (erase-buffer)
+    (olm-do-command "Olm.deleted_items_folder_id" (current-buffer))
     (buffer-substring-no-properties (point-min) (1- (point-max)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -278,7 +287,8 @@
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
   (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
   (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
-  (define-key olm-summary-mode-map "o" 'olm-summary-refile))
+  (define-key olm-summary-mode-map "o" 'olm-summary-refile)
+  (define-key olm-summary-mode-map "d" 'olm-summary-delete))
 
 (defun olm-summary-inc ()
   (interactive)
@@ -304,7 +314,8 @@
 (defun olm-summary-mode-keyword ()
   (font-lock-add-keywords
    nil
-   '(("^o.*$" . font-lock-builtin-face))))
+   '(("^o.*$" . font-lock-builtin-face)
+     ("^D.*$" . font-lock-warning-face))))
 
 (add-hook 'olm-summary-mode-hook 'olm-summary-mode-keyword)
 
@@ -406,15 +417,17 @@
   (setq olm-folder-id (assoc-default olm-folder-name olm-folder-alist))
   (olm-scan))
 
-(defun olm-summary-refile ()
+(defun olm-summary-refile (&optional to mark)
   (interactive)
-  (let* ((from (olm-summary-message-entry-id))
-         (folder-name (completing-read "Refile to: "
-                                       (olm-folder-names)
-                                       nil
-                                       t))
-         (to (assoc-default folder-name olm-folder-alist))
-         (n (line-number-at-pos)))
+  (let ((from (olm-summary-message-entry-id))
+        (to (or to
+                (assoc-default (completing-read "Refile to: "
+                                               (olm-folder-names)
+                                               nil
+                                               t)
+                              olm-folder-alist)))
+        (mark (or mark "o"))
+        (n (line-number-at-pos)))
     ;; insert the destination entry id into the org-ids buffer
     (with-current-buffer (olm-buf-entry-ids)
       (goto-line n)
@@ -425,8 +438,13 @@
     (beginning-of-line)
     (setq-local buffer-read-only nil)
     (delete-char 1)
-    (insert "o")
+    (insert mark)
     (setq-local buffer-read-only t)))
+
+(defun olm-summary-delete ()
+  (interactive)
+  (olm-summary-refile olm-deleted-items-folder-id "D"))
+
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
