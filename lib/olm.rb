@@ -65,4 +65,8 @@ module Olm
   def save_attachments(entry_id, path)
     app.save_attachments(entry_id, path)
   end
+
+  def execute_refile
+    app.execute_refile(ARGF)
+  end
 end
