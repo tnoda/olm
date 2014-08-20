@@ -201,8 +201,33 @@
       (insert "---- \n"))
     buf))
 
-(defun olm-buf-draft-reply-all ()
-  (generate-new-buffer "*olm-draft-reply-all*"))
+(defun olm-buf-draft-reply-all (entry-id)
+  (let ((buf (generate-new-buffer "*olm-draft-reply-all*")))
+    (with-current-buffer buf
+      (olm-do-command (format "Olm.create_reply_all_message %S"
+                              entry-id)
+                      t)
+      (goto-char (point-min))
+      (re-search-forward "^From: ")
+      (insert "***Reply All***")
+      (when olm-default-bcc
+        (goto-char (point-min))
+        (re-search-forward "^---- ")
+        (beginning-of-line)
+        (insert "Bcc: " olm-default-bcc "\n"))
+      (olm-draft-reply-all-mode)
+      (let ((inhibit-read-only t))
+        (put-text-property (progn
+                             (goto-char (point-min))
+                             (point))
+                           (progn
+                             (re-search-forward "^---- ")
+                             (point))
+                           'read-only
+                           t))
+      (olm-hide-entry-id-line)
+      (forward-line))
+    buf))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -214,7 +239,8 @@
 
 (unless olm-message-mode-map
   (setq olm-message-mode-map (make-sparse-keymap))
-  (define-key olm-message-mode-map "\C-c\C-a" 'olm-message-save-attachments))
+  (define-key olm-message-mode-map "\C-c\C-a" 'olm-message-save-attachments)
+  (define-key olm-message-mode-map "\C-c\C-r" 'olm-message-reply-all))
 
 (defun olm-message-mode ()
   (interactive)
@@ -252,6 +278,13 @@
     (olm-do-command (format "Olm.save_attachments(%S, %S)"
                             entry-id
                             olm-attachment-path))))
+
+(defun olm-message-reply-all ()
+  (interactive)
+  (-> (olm-message-entry-id)
+    olm-buf-draft-reply-all
+    switch-to-buffer))
+
 
 ;;; A helper function for olm-message-mode
 (defun olm-message-entry-id ()
@@ -380,31 +413,7 @@
 
 (defun olm-summary-reply-all ()
   (interactive)
-  (let ((entry-id (olm-summary-message-entry-id))
-        (buf (olm-buf-draft-reply-all)))
-    (olm-do-command (format "Olm.create_reply_all_message %S" entry-id)
-                    buf)
-    (with-current-buffer buf
-      (goto-char (point-min))
-      (re-search-forward "^From: ")
-      (insert "***Reply All***")
-      (when olm-default-bcc
-        (goto-char (point-min))
-        (re-search-forward "^---- ")
-        (beginning-of-line)
-        (insert "Bcc: " olm-default-bcc "\n"))
-      (olm-draft-reply-all-mode)
-      (let ((inhibit-read-only t))
-        (put-text-property (progn
-                             (goto-char (point-min))
-                             (point))
-                           (progn
-                             (re-search-forward "^---- ")
-                             (point))
-                           'read-only
-                           t))
-      (olm-hide-entry-id-line)
-      (forward-line))
+  (let ((buf (olm-buf-draft-reply-all (olm-summary-message-entry-id))))
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
