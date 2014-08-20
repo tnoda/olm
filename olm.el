@@ -81,7 +81,10 @@
                    (setq-local buffer-read-only nil)
                    (erase-buffer))
                  buf))
-         (ibuf (olm-buf-entry-ids t)))
+         (ibuf (let ((buf (olm-buf-entry-ids)))
+                 (with-current-buffer buf
+                   (erase-buffer))
+                 buf)))
     (with-current-buffer lbuf
       (--dotimes n
         (progn
@@ -174,13 +177,8 @@
       (setq-local inherit-process-coding-system t))
     buf))
 
-(defun olm-buf-entry-ids (&optional erase-buffer)
-  (let ((buf(get-buffer-create "*olm-entry-ids*")))
-    (when erase-buffer
-      (with-current-buffer buf
-        (setq-local buffer-read-only nil)
-        (erase-buffer)))
-    buf))
+(defun olm-buf-entry-ids ()
+  (get-buffer-create "*olm-entry-ids*"))
 
 (defun olm-buf-message ()
   (let ((buf (get-buffer-create "*olm-message*")))

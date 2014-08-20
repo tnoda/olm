@@ -155,24 +155,10 @@ module Olm
       end
     end
 
-    def execute_refile(io)
-      io.each_line do |line|
-        line.chomp!
-        next unless /^[0-9A-Z]{140} [0-9A-Z]{140}/ =~ line
-        move($1, $2)
-      end
-    end
-
     private
 
     def const_load(klass)
       WIN32OLE.const_load(@app, klass)
-    end
-
-    def move(from, to)
-      item = @ns.GetItemFromID(from)
-      folder = @ns.GetFolderFromID(to)
-      item.Move(folder)
     end
   end
 end
