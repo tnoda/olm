@@ -329,7 +329,8 @@
   (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
   (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
   (define-key olm-summary-mode-map "o" 'olm-summary-refile)
-  (define-key olm-summary-mode-map "d" 'olm-summary-delete))
+  (define-key olm-summary-mode-map "d" 'olm-summary-delete)
+  (define-key olm-summary-mode-map "x" 'olm-summary-exec))
 
 (defun olm-summary-inc ()
   (interactive)
@@ -461,6 +462,13 @@
 (defun olm-summary-delete ()
   (interactive)
   (olm-summary-refile olm-deleted-items-folder-id "D"))
+
+(defun olm-summary-exec ()
+  "Process marked messages."
+  (interactive)
+  (with-current-buffer (olm-buf-entry-ids)
+    (olm-do-command-buf "Olm.execute_refile"))
+  (olm-scan))
 
 
 ;;; A helper function for olm-summary-mode functions.
