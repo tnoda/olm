@@ -155,12 +155,6 @@ module Olm
       end
     end
 
-    def move(from, to)
-      item = @ns.GetItemFromID(from)
-      folder = @ns.GetFolderFromID(to)
-      item.Move(folder)
-    end
-
     private
 
     def const_load(klass)
