@@ -120,6 +120,12 @@
     (call-process olm-ruby-executable nil buf nil
                   "-r" "rubygems" "-r" "olm" "-e" command)))
 
+(defun olm-do-command-buf (command)
+  (call-process-region (point-min) (point-max)
+                       olm-ruby-executable
+                       nil (get-buffer-create "*Messages*") nil
+                       "-r" "rubygems" "-r" "olm" "-e" command))
+
 (defun olm-sync ()
   (interactive)
   (with-current-buffer (get-buffer-create "*olm-sync*")
@@ -507,22 +513,16 @@
   (kill-buffer)
   (olm-scan))
 
-(defun olm-draft-do-command (command)
-  (call-process-region (point-min) (point-max)
-                       olm-ruby-executable
-                       nil (get-buffer-create "*Messages*") nil
-                       "-r" "rubygems" "-r" "olm" "-e" command))
-
 (defun olm-draft-save-message ()
   (interactive)
   (message "Olm: saving message ...")
-  (olm-draft-do-command "Olm.save_message")
+  (olm-do-command-buf "Olm.save_message")
   (olm-draft-kill))
 
 (defun olm-draft-send-message ()
   (interactive)
   (message "Olm: sending message ...")
-  (olm-draft-do-command "Olm.send_message")
+  (olm-do-command-buf "Olm.send_message")
   (olm-draft-kill))
 
 
@@ -552,7 +552,7 @@
   (message msg)
   (save-restriction
     (widen)
-    (olm-draft-do-command cmd)))
+    (olm-do-command-buf cmd)))
 
 (defun olm-draft-reply-all-save-message ()
   (interactive)
