@@ -330,7 +330,8 @@
   (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
   (define-key olm-summary-mode-map "o" 'olm-summary-refile)
   (define-key olm-summary-mode-map "d" 'olm-summary-delete)
-  (define-key olm-summary-mode-map "x" 'olm-summary-exec))
+  (define-key olm-summary-mode-map "x" 'olm-summary-exec)
+  (define-key olm-summary-mode-map "*" 'olm-summary-review))
 
 (defun olm-summary-inc ()
   (interactive)
@@ -357,7 +358,8 @@
   (font-lock-add-keywords
    nil
    '(("^o.*$" . font-lock-builtin-face)
-     ("^D.*$" . font-lock-warning-face))))
+     ("^D.*$" . font-lock-warning-face)
+     ("^\\*.*$" . font-lock-comment-face))))
 
 (add-hook 'olm-summary-mode-hook 'olm-summary-mode-keyword)
 
@@ -470,6 +472,14 @@
     (olm-do-command-buf "Olm.execute_refile"))
   (olm-scan))
 
+(defun olm-summary-review ()
+  "Put the review mark (`*')."
+  (interactive)
+  (beginning-of-line)
+    (setq-local buffer-read-only nil)
+    (delete-char 1)
+    (insert "*")
+    (setq-local buffer-read-only t))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
@@ -491,6 +501,7 @@
     (if window
         (set-window-buffer window mbuf)
       (switch-to-buffer mbuf))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
