@@ -454,12 +454,7 @@
       (re-search-forward "^[0-9A-Z]\\{140\\}")
       (delete-region (point) (point-at-eol))
       (insert " " to))
-    ;; insert `o' mark at the beginning of the line
-    (beginning-of-line)
-    (setq-local buffer-read-only nil)
-    (delete-char 1)
-    (insert mark)
-    (setq-local buffer-read-only t)))
+    (olm-summary-insert-mark mark)))
 
 (defun olm-summary-delete ()
   (interactive)
@@ -475,11 +470,7 @@
 (defun olm-summary-review ()
   "Put the review mark (`*')."
   (interactive)
-  (beginning-of-line)
-    (setq-local buffer-read-only nil)
-    (delete-char 1)
-    (insert "*")
-    (setq-local buffer-read-only t))
+  (olm-summary-insert-mark "*"))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
@@ -489,6 +480,13 @@
       (goto-line n)
       (re-search-forward "\\b[0-9A-Z]\\{140\\}\\b" nil t)
       (match-string-no-properties 0))))
+
+(defun olm-summary-insert-mark (mark)
+  (beginning-of-line)
+  (setq-local buffer-read-only nil)
+  (delete-char 1)
+  (insert mark)
+  (setq-local buffer-read-only t))
 
 (defun olm-open-message (entry-id &optional window)
   (let ((mbuf (olm-buf-message)))
