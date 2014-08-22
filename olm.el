@@ -474,7 +474,6 @@
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
-  ()
   (let ((n (line-number-at-pos)))
     (with-current-buffer (olm-buf-entry-ids)
       (goto-line n)
