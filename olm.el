@@ -339,7 +339,8 @@
   (define-key olm-summary-mode-map "o" 'olm-summary-refile)
   (define-key olm-summary-mode-map "d" 'olm-summary-delete)
   (define-key olm-summary-mode-map "x" 'olm-summary-exec)
-  (define-key olm-summary-mode-map "*" 'olm-summary-review))
+  (define-key olm-summary-mode-map "*" 'olm-summary-review)
+  (define-key olm-summary-mode-map "mo" 'olm-summary-mark-refile))
 
 (defun olm-summary-inc ()
   (interactive)
@@ -474,6 +475,13 @@
   "Put the review mark (`*')."
   (interactive)
   (olm-summary-insert-mark "*"))
+
+(defun olm-summary-mark-refile ()
+  (interactive)
+  (let ((to (olm-pick-a-folder)))
+    (goto-char (point-min))
+    (while (re-search-forward "^\\*" nil t)
+      (olm-summary-refile to "o"))))
 
 ;;; A helper function for olm-summary-mode functions.
 (defun olm-summary-message-entry-id ()
