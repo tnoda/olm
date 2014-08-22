@@ -167,6 +167,14 @@
     (olm-do-command "Olm.deleted_items_folder_id" (current-buffer))
     (buffer-substring-no-properties (point-min) (1- (point-max)))))
 
+(defun olm-pick-a-folder ()
+  (assoc-default (completing-read "Refile to: "
+                                  (olm-folder-names)
+                                  nil
+                                  t)
+                 olm-folder-alist))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; buffers
@@ -440,12 +448,7 @@
 (defun olm-summary-refile (&optional to mark)
   (interactive)
   (let ((from (olm-summary-message-entry-id))
-        (to (or to
-                (assoc-default (completing-read "Refile to: "
-                                               (olm-folder-names)
-                                               nil
-                                               t)
-                              olm-folder-alist)))
+        (to (or to (olm-pick-a-folder)))
         (mark (or mark "o"))
         (n (line-number-at-pos)))
     ;; insert the destination entry id into the org-ids buffer
