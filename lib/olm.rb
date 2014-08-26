@@ -54,6 +54,11 @@ module Olm
     message(reply_mail_entry_id)
   end
 
+  def create_forward_message(entry_id)
+    forward_mail_entry_id = app.create_forward_message(entry_id)
+    message(forward_mail_entry_id)
+  end
+
   def update_message_body_and_save
     app.update_message_body(ARGF).Save
   end

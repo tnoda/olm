@@ -124,6 +124,14 @@ module Olm
       r.EntryID
     end
 
+    def create_forward_message(entry_id)
+      m = @ns.GetItemFromID(entry_id)
+      r = m.Forward
+      r.BodyFormat = OlFormatPlain
+      r.Save
+      r.EntryID
+    end
+
     def update_message_body(io)
       entry_id = nil
       header = true

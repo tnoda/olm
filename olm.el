@@ -217,34 +217,43 @@
       (insert "---- \n"))
     buf))
 
-(defun olm-buf-draft-reply-all (entry-id)
+(defun olm-buf-draft-command (entry-id command from-line &optional header-locked)
   (let ((buf (generate-new-buffer "*olm-draft-reply-all*")))
     (with-current-buffer buf
-      (olm-do-command (format "Olm.create_reply_all_message %S"
-                              entry-id)
-                      t)
+      (olm-do-command (format command entry-id) t)
       (goto-char (point-min))
       (re-search-forward "^From: ")
-      (insert "***Reply All***")
+      (insert from-line)
       (when olm-default-bcc
         (goto-char (point-min))
         (re-search-forward "^---- ")
         (beginning-of-line)
         (insert "Bcc: " olm-default-bcc "\n"))
       (olm-draft-reply-all-mode)
-      (let ((inhibit-read-only t))
-        (put-text-property (progn
-                             (goto-char (point-min))
-                             (point))
-                           (progn
-                             (re-search-forward "^---- ")
-                             (point))
-                           'read-only
-                           t))
+      (when header-locked
+        (let ((inhibit-read-only t))
+          (put-text-property (progn
+                               (goto-char (point-min))
+                               (point))
+                             (progn
+                               (re-search-forward "^---- ")
+                               (point))
+                             'read-only
+                             t)))
       (olm-hide-entry-id-line)
       (forward-line))
     buf))
 
+(defun olm-buf-draft-reply-all (entry-id)
+  (olm-buf-draft-command entry-id
+                         "Olm.create_reply_all_message %S"
+                         "***Reply All***"
+                         t))
+
+(defun olm-buf-draft-forward (entry-id)
+  (olm-buf-draft-command entry-id
+                         "Olm.create_forward_message %S"
+                         "***Forward***"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -335,6 +344,7 @@
   (define-key olm-summary-mode-map "!" 'olm-summary-toggle-flag)
   (define-key olm-summary-mode-map "w" 'olm-summary-write)
   (define-key olm-summary-mode-map "A" 'olm-summary-reply-all)
+  (define-key olm-summary-mode-map "f" 'olm-summary-forward)
   (define-key olm-summary-mode-map "g" 'olm-summary-goto-folder)
   (define-key olm-summary-mode-map "o" 'olm-summary-refile)
   (define-key olm-summary-mode-map "d" 'olm-summary-delete)
@@ -434,6 +444,12 @@
 (defun olm-summary-reply-all ()
   (interactive)
   (let ((buf (olm-buf-draft-reply-all (olm-summary-message-entry-id))))
+    (delete-other-windows-vertically)
+    (switch-to-buffer buf)))
+
+(defun olm-summary-forward ()
+  (interactive)
+  (let ((buf (olm-buf-draft-forward (olm-summary-message-entry-id))))
     (delete-other-windows-vertically)
     (switch-to-buffer buf)))
 
