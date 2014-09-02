@@ -21,7 +21,7 @@ module Olm
 
     def ls(folder_id = nil)
       f = folder_id ? @ns.GetFolderFromID(folder_id) : default_folder
-      n = [f.Items.Count, 30].min
+      n = [f.Items.Count, 100].min
       s = f.Items.Count - n + 1
       t = f.Items.Count
       res = []
