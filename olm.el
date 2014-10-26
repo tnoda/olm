@@ -217,7 +217,7 @@
       (insert "---- \n"))
     buf))
 
-(defun olm-buf-draft-command (entry-id command from-line &optional header-locked)
+(defun olm-buf-draft-command (entry-id command from-line mode &optional header-locked)
   (let ((buf (generate-new-buffer "*olm-draft-reply-all*")))
     (with-current-buffer buf
       (olm-do-command (format command entry-id) t)
@@ -229,7 +229,7 @@
         (re-search-forward "^---- ")
         (beginning-of-line)
         (insert "Bcc: " olm-default-bcc "\n"))
-      (olm-draft-reply-all-mode)
+      (funcall mode)
       (when header-locked
         (let ((inhibit-read-only t))
           (put-text-property (progn
@@ -248,12 +248,14 @@
   (olm-buf-draft-command entry-id
                          "Olm.create_reply_all_message %S"
                          "***Reply All***"
+                         'olm-draft-reply-all-mode
                          t))
 
 (defun olm-buf-draft-forward (entry-id)
   (olm-buf-draft-command entry-id
                          "Olm.create_forward_message %S"
-                         "***Forward***"))
+                         "***Forward***"
+                         'olm-draft-forward-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -612,6 +614,43 @@
 (add-hook 'olm-draft-reply-all-hook 'olm-message-mode-keyword)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; olm-draft-forward
+;;;
+(defvar olm-draft-forward-map nil)
+(defvar olm-draft-forward-hook nil)
+
+(unless olm-draft-forward-map
+  (setq olm-draft-forward-map (make-sparse-keymap))
+  (define-key olm-draft-forward-map "\C-c\C-q" 'olm-draft-kill)
+  (define-key olm-draft-forward-map "\C-c\C-c" 'olm-draft-forward-send-message)
+  (define-key olm-draft-forward-map "\C-c\C-s" 'olm-draft-forward-save-message))
+
+(defun olm-draft-forward-mode ()
+  (interactive)
+  (setq major-mode 'olm-draft-forward-mode)
+  (setq mode-name "Olm Draft Forward")
+  (setq-local line-move-ignore-invisible t)
+  (font-lock-mode 1)
+  (use-local-map olm-draft-forward-map)
+  (run-hooks 'olm-draft-forward-hook))
+
+(defalias 'olm-draft-forward-do-command 'olm-draft-reply-all-do-command)
+
+(defun olm-draft-forward-save-message ()
+  (interactive)
+  (olm-draft-forward-do-command "Olm.update_forward_message_body_and_save"
+                                "Olm: saving message ...")
+  (olm-draft-kill))
+
+(defun olm-draft-forward-send-message ()
+  (interactive)
+  (olm-draft-forward-do-command "Olm.update_forward_message_body_and_send"
+                                "Olm: sending message ...")
+  (olm-draft-kill))
+
+(add-hook 'olm-draft-forward-hook 'olm-message-mode-keyword)
 
 (provide 'olm)
 ;;; olm.el ends here
