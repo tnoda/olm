@@ -119,7 +119,7 @@ module Olm
 
     def update_message_body(io)
       d = read_draft(io)
-      m = @ns.GetItemFromID(entry_id)
+      m = @ns.GetItemFromID(d[:entry_id])
       m.BodyFormat = OlFormatPlain
       m.Body = d[:body]
       m.BCC = d[:bcc] if d[:bcc]
