@@ -156,6 +156,16 @@ module Olm
       m
     end
 
+    def update_forward_message_body(io)
+      d = read_draft(io)
+      m = @ns.GetItemFromID(d[:entry_id])
+      m.BodyFormat = OlFormatPlain
+      m.Body = d[:body]
+      m.To = d[:to]
+      m.BCC = d[:bcc] if d[:bcc]
+      m
+    end
+
     def save_attachments(entry_id, path)
       m = @ns.GetItemFromID(entry_id)
       m.Attachments.each do |a|
@@ -172,6 +182,23 @@ module Olm
     end
 
     private
+
+    def read_draft(io)
+      {}.update(entry_id: io.readline.chomp)
+        .update(read_draft_headers(io))
+        .update(body: io.readlines.map { |s| s.chomp }.join("\r\n"))
+    end
+
+    def read_draft_headers(io)
+      headers = {}
+      io.each_line do |line|
+        break if /^---- / =~ line
+        line.chomp!
+        next unless /^([^:]+): (.*)/ =~ line
+        headers[$1.downcase.intern] = $2
+      end
+      headers
+    end
 
     def const_load(klass)
       WIN32OLE.const_load(@app, klass)

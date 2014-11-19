@@ -67,6 +67,14 @@ module Olm
     app.update_message_body(ARGF).Send
   end
 
+  def update_forward_message_body_and_save
+    app.update_forward_message_body(ARGF).Save
+  end
+
+  def update_forward_message_body_and_send
+    app.update_forward_message_body(ARGF).Send
+  end
+
   def save_attachments(entry_id, path)
     app.save_attachments(entry_id, path)
   end
