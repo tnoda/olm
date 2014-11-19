@@ -1,7 +1,7 @@
 require 'olm/app'
 
 module Olm
-  VERSION = '0.0.1'
+  VERSION = '0.1.3'
 
   extend self
 

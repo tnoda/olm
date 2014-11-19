@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = Olm::VERSION
   spec.authors       = ["Takahiro Noda"]
   spec.email         = ["takahiro.noda+rubygems@gmail.com"]
-  spec.summary       = %q{A glue library to manipulate MS Outlook Mail.}
+  spec.summary       = %q{A glue library to handle MS Outlook Mail.}
   spec.description   = %q{Olm is designed for reading and writing Outlook mail using the win32ole library and against Outlook 2007.}
   spec.homepage      = "https://github.com/tnoda/olm"
   spec.license       = "MIT"
