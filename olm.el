@@ -3,6 +3,7 @@
 ;; Copyright (C) 2014  Takahiro Noda
 
 ;; Author: Takahiro Noda <takahiro.noda+github@gmail.com>
+;; Version: 0.1.1
 ;; Keywords: mail
 ;; Package-Requires: ((dash "2.8.0"))
 
