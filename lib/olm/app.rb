@@ -131,7 +131,7 @@ module Olm
       m = @ns.GetItemFromID(d[:entry_id])
       m.BodyFormat = OlFormatPlain
       m.Body = d[:body]
-      m.To = d[:to]
+      m.To = d[:to] if d[:to]
       m.BCC = d[:bcc] if d[:bcc]
       m
     end
