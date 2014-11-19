@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014  Takahiro Noda
 
 ;; Author: Takahiro Noda <takahiro.noda+github@gmail.com>
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Keywords: mail
 ;; Package-Requires: ((dash "2.8.0"))
 
@@ -561,14 +561,15 @@
 
 (defun olm-draft-save-message ()
   (interactive)
-  (message "Olm: saving message ...")
-  (olm-do-command-buf "Olm.save_message")
+  (olm-draft-reply-all-do-command "Olm.save_message"
+                                  "Olm: saving message ...")
   (olm-draft-kill))
 
 (defun olm-draft-send-message ()
   (interactive)
   (message "Olm: sending message ...")
-  (olm-do-command-buf "Olm.send_message")
+  (olm-draft-reply-all-do-command "Olm.send_message"
+                                  "Olm: sending message ...")
   (olm-draft-kill))
 
 

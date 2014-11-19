@@ -90,29 +90,14 @@ module Olm
     end
 
     def create_message(io)
-      x = {:body => ''}
-      header = true
-      io.each_line do |line|
-        line.chomp!
-        if header
-          if /^---- / =~ line
-            header = false
-          else
-            next unless /^(.*?): (.*)/ =~ line
-            x[$1] = $2
-          end
-        else
-          x[:body] << line
-          x[:body] << "\r\n"
-        end
-      end
+      d = read_draft(io)
       m = @app.CreateItem(OlMailItem)
       m.BodyFormat = OlFormatPlain
-      m.To = x['To'] if x['To']
-      m.CC = x['Cc'] if x['Cc']
-      m.BCC = x['Bcc'] if x['Bcc']
-      m.Subject = x['Subject'] if x['Subject']
-      m.Body = x[:body] if x[:body]
+      m.To = d[:to] if d[:to]
+      m.CC = d[:cc] if d[:cc]
+      m.BCC = d[:bcc] if d[:bcc]
+      m.Subject = d[:subject] if d[:subject]
+      m.Body = d[:body] if d[:body]
       m
     end
 
@@ -133,26 +118,11 @@ module Olm
     end
 
     def update_message_body(io)
-      entry_id = nil
-      header = true
-      bcc = nil
-      body = ''
-      io.each_line do |line|
-        line.chomp!
-        if entry_id.nil?
-          entry_id = line
-        elsif header
-          bcc = $1 if /^Bcc: (.*)/ =~ line
-          header = false if /^---- / =~ line
-        else
-          body << line
-          body << "\r\n"
-        end
-      end
+      d = read_draft(io)
       m = @ns.GetItemFromID(entry_id)
       m.BodyFormat = OlFormatPlain
-      m.Body = body
-      m.BCC = bcc if bcc
+      m.Body = d[:body]
+      m.BCC = d[:bcc] if d[:bcc]
       m
     end
 
