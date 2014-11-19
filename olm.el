@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014  Takahiro Noda
 
 ;; Author: Takahiro Noda <takahiro.noda+github@gmail.com>
-;; Version: 0.1.2
+;; Version: 0.1.3
 ;; Keywords: mail
 ;; Package-Requires: ((dash "2.8.0"))
 
@@ -121,11 +121,14 @@
     (call-process olm-ruby-executable nil buf nil
                   "-r" "rubygems" "-r" "olm" "-e" command)))
 
-(defun olm-do-command-buf (command)
-  (call-process-region (point-min) (point-max)
-                       olm-ruby-executable
-                       nil (get-buffer-create "*Messages*") nil
-                       "-r" "rubygems" "-r" "olm" "-e" command))
+(defun olm-do-command-buf (command &optional msg)
+  (when msg (message msg))
+  (save-restriction
+    (widen)
+    (call-process-region (point-min) (point-max)
+                         olm-ruby-executable
+                         nil (get-buffer-create "*Messages*") nil
+                         "-r" "rubygems" "-r" "olm" "-e" command)))
 
 (defun olm-sync ()
   (interactive)
@@ -561,15 +564,15 @@
 
 (defun olm-draft-save-message ()
   (interactive)
-  (olm-draft-reply-all-do-command "Olm.save_message"
-                                  "Olm: saving message ...")
+  (olm-do-command-buf "Olm.save_message"
+                      "Olm: saving message ...")
   (olm-draft-kill))
 
 (defun olm-draft-send-message ()
   (interactive)
   (message "Olm: sending message ...")
-  (olm-draft-reply-all-do-command "Olm.send_message"
-                                  "Olm: sending message ...")
+  (olm-do-command-buf "Olm.send_message"
+                      "Olm: sending message ...")
   (olm-draft-kill))
 
 
@@ -595,22 +598,16 @@
   (use-local-map olm-draft-reply-all-map)
   (run-hooks 'olm-draft-reply-all-hook))
 
-(defun olm-draft-reply-all-do-command (cmd msg)
-  (message msg)
-  (save-restriction
-    (widen)
-    (olm-do-command-buf cmd)))
-
 (defun olm-draft-reply-all-save-message ()
   (interactive)
-  (olm-draft-reply-all-do-command "Olm.update_message_body_and_save"
-                                  "Olm: saving message ...")
+  (olm-do-command-buf "Olm.update_message_body_and_save"
+                      "Olm: saving message ...")
   (olm-draft-kill))
 
 (defun olm-draft-reply-all-send-message ()
   (interactive)
-  (olm-draft-reply-all-do-command "Olm.update_message_body_and_send"
-                                  "Olm: sending message ...")
+  (olm-do-command-buf "Olm.update_message_body_and_send"
+                      "Olm: sending message ...")
   (olm-draft-kill))
 
 (add-hook 'olm-draft-reply-all-hook 'olm-message-mode-keyword)
@@ -638,18 +635,16 @@
   (use-local-map olm-draft-forward-map)
   (run-hooks 'olm-draft-forward-hook))
 
-(defalias 'olm-draft-forward-do-command 'olm-draft-reply-all-do-command)
-
 (defun olm-draft-forward-save-message ()
   (interactive)
-  (olm-draft-forward-do-command "Olm.update_forward_message_body_and_save"
-                                "Olm: saving message ...")
+  (olm-do-command-buf "Olm.update_forward_message_body_and_save"
+                      "Olm: saving message ...")
   (olm-draft-kill))
 
 (defun olm-draft-forward-send-message ()
   (interactive)
-  (olm-draft-forward-do-command "Olm.update_forward_message_body_and_send"
-                                "Olm: sending message ...")
+  (olm-do-command-buf "Olm.update_forward_message_body_and_send"
+                      "Olm: sending message ...")
   (olm-draft-kill))
 
 (add-hook 'olm-draft-forward-hook 'olm-message-mode-keyword)
